@@ -25,7 +25,12 @@ public class Player {
         evaluateLevel();
     }
 
-    public void gotKilledBy(int enemyType){
+    public void changeScore(int score) {
+        this.score = score;
+        evaluateLevel();
+    }
+
+    public void gotKilledBy(int enemyType) {
         lifes--;
         removeFromScore(Enemy.stolenPoints(enemyType));
     }
@@ -36,18 +41,30 @@ public class Player {
     }
 
     private void evaluateLevel() {
-        if (score >= LEVEL_SCORES[level]) {
-            level++;
-        }
-        if (level > 0) {
-            if (score < LEVEL_SCORES[level - 1]) {
-                level--;
+
+        boolean isDone = false;
+        level = 0;
+
+        for (int i = 0; i < LEVEL_SCORES.length && !isDone; i++) {
+            if(score >= LEVEL_SCORES[i]){
+                level++;
+            }else{
+                isDone = true;
             }
         }
     }
 
-    public boolean stillAlive(){
+    public boolean stillAlive() {
         return lifes > 0;
+    }
+
+    public String getInfo() {
+        String msg = "\nJugador " + nickname + ":\n" +
+                "Puntaje: " + score + "\n" +
+                "Nivel: " + level + "\n" +
+                "Siguiente nivel en: " + (level == LEVEL_SCORES.length? 0:LEVEL_SCORES[level] - score) + " puntos\n" +
+                "Vidas restantes: " + lifes + "\n";
+        return msg;
     }
 
     public String getNickname() {
@@ -74,11 +91,11 @@ public class Player {
         this.lifes = lifes;
     }
 
-    public int getScore(){
+    public int getScore() {
         return score;
     }
 
-    public int getLevel(){
+    public int getLevel() {
         return level;
     }
 }

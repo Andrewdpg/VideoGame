@@ -1,20 +1,26 @@
 package ui;
 
-import model.Enemy;
-import model.Player;
-
 public class Main {
+
+    Menu menu;
+    public Main(){
+        this.menu = new Menu();
+    }
+
+    public Menu getMenu(){
+        return menu;
+    }
 
     public static void main(String[] args) {
 
-        Player player = new Player("Andrewpg", "Andrés Parra");
-        Enemy enemy = new Enemy(Enemy.BOSS);
-        System.out.println(player.getScore());
+        Main main = new Main();
 
-        enemy.addScore();
-        player.gotKilledBy(enemy.getType());
-        
-        player.addToScore(enemy.killAndDropScore());
-        System.out.println(player.getScore());
+        do{
+
+            main.getMenu().showMenu();
+            main.getMenu().readOption();
+            main.getMenu().executeOption();
+
+        }while(main.menu.stillAlive());
     }
 }
