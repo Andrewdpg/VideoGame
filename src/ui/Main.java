@@ -1,13 +1,16 @@
 package ui;
 
+
 public class Main {
 
-    Menu menu;
-    public Main(){
+    private Menu menu;
+
+    public Main() {
         this.menu = new Menu();
+        
     }
 
-    public Menu getMenu(){
+    public Menu getMenu() {
         return menu;
     }
 
@@ -15,12 +18,12 @@ public class Main {
 
         Main main = new Main();
 
-        do{
+        do {
 
             main.getMenu().showMenu();
             main.getMenu().readOption();
             main.getMenu().executeOption();
 
-        }while(main.menu.stillAlive());
+        } while (main.menu.stillAlive());
     }
 }

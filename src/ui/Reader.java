@@ -2,6 +2,8 @@ package ui;
 
 import java.util.Scanner;
 
+import model.Response;
+
 public class Reader {
 
     private static Scanner scn = new Scanner(System.in);

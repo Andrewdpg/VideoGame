@@ -4,7 +4,7 @@ public class Player {
 
     public static final int INITIAL_SCORE = 10;
     public static final int INITIAL_LIFES = 5;
-    public static final int[] LEVEL_SCORES = { 20, 30, 45, 70, 105, 150 };
+    
 
     private String nickname;
     private String name;
@@ -30,12 +30,16 @@ public class Player {
         evaluateLevel();
     }
 
-    public void gotKilledBy(int enemyType) {
-        lifes--;
-        removeFromScore(Enemy.stolenPoints(enemyType));
+    public int neededScore(){
+        return Game.SCORES_FOR_LEVEL[level] - score;
     }
 
-    private void removeFromScore(int points) {
+    public void gotKilledBy(int enemyType) {
+        lifes--;
+        removeFromScore(Enemy.pointsThatSteals(enemyType));
+    }
+
+    public void removeFromScore(int points) {
         score = score - points;
         evaluateLevel();
     }
@@ -45,8 +49,8 @@ public class Player {
         boolean isDone = false;
         level = 0;
 
-        for (int i = 0; i < LEVEL_SCORES.length && !isDone; i++) {
-            if(score >= LEVEL_SCORES[i]){
+        for (int i = 0; i < Game.SCORES_FOR_LEVEL.length && !isDone; i++) {
+            if(score >= Game.SCORES_FOR_LEVEL[i]){
                 level++;
             }else{
                 isDone = true;
@@ -58,11 +62,11 @@ public class Player {
         return lifes > 0;
     }
 
-    public String getInfo() {
+    public String getInfoToString() {
         String msg = "\nJugador " + nickname + ":\n" +
                 "Puntaje: " + score + "\n" +
                 "Nivel: " + level + "\n" +
-                "Siguiente nivel en: " + (level == LEVEL_SCORES.length? 0:LEVEL_SCORES[level] - score) + " puntos\n" +
+                "Siguiente nivel en: " + (level == Game.SCORES_FOR_LEVEL.length? 0:Game.SCORES_FOR_LEVEL[level] - score) + " puntos\n" +
                 "Vidas restantes: " + lifes + "\n";
         return msg;
     }

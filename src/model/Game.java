@@ -1,18 +1,25 @@
 package model;
 
 import ui.Reader;
-import ui.Response;
 
 public class Game {
 
     public static final String NAME = "YOQUESE";
     public static final int MAX_PLAYERS = 20;
+    public static final int MAX_ENEMIES = 25;
+    public static final int MAX_TREASURES = 50;
+    public static final int MAX_LEVEL = 10;
+    public static int[] SCORES_FOR_LEVEL = new int[MAX_LEVEL];
 
     private Player[] players;
+    private Level[] levels;
+
     private Response response;
+    private int currentLevel;
 
     public Game() {
         players = new Player[MAX_PLAYERS];
+        levels = new Level[MAX_LEVEL];
         response = new Response();
     }
 
@@ -54,7 +61,7 @@ public class Game {
         for (int pos = 0; pos < players.length && response.isError(); pos++) {
             if (players[pos] != null) {
                 if (players[pos].getNickname().equals(nickname)) {
-                    response.setResponse(false, players[pos].getInfo(), pos);
+                    response.setResponse(false, players[pos].getInfoToString(), pos);
                 }
             }
         }
@@ -62,24 +69,106 @@ public class Game {
         return response;
     }
 
-    public Response modifyScore() {
-
-        System.out.print("Apodo del jugador a modificar: ");
-        String nickname = Reader.readLine();
+    public Response modifyScore(String nickname) {
 
         response = searchPlayerByNickname(nickname);
-        int pos = response.getData() != null? (int) response.getData(): 0;
 
-        if(!response.isError()){
+        if (!response.isError()) {
+            int pos = (int) response.getData();
             System.out.println(response.getMessage());
 
             System.out.println("Nuevo puntaje: ");
             int newScore = Reader.readScore();
 
             players[pos].changeScore(newScore);
-            response.setResponse(false, players[pos].getInfo(), null);
+            response.setResponse(false, players[pos].getInfoToString(), null);
         }
 
         return response;
+    }
+
+    public Response levelUp(String nickname) {
+        response = searchPlayerByNickname(nickname);
+
+        if (!response.isError()) {
+            int pos = (int) response.getData();
+            players[pos].addToScore(players[pos].neededScore());
+            response.setResponse(false, players[pos].getInfoToString(), null);
+        }
+
+        return response;
+    }
+
+    public Response generateNewRandomGame() {
+
+        int enemiesToGenerate = MAX_ENEMIES;
+        int treasuresToGenerate = MAX_TREASURES;
+        int totalScoreUntil = 0;
+
+        for (int i = 0; i < MAX_LEVEL; i++) {
+
+            int enemiesInLevel = (int) (Math.random() * enemiesToGenerate);
+            int treasuresInLevel = (int) (Math.random() * treasuresToGenerate);
+
+            if(enemiesInLevel > ((int) (MAX_ENEMIES / (MAX_LEVEL - i)))){
+                enemiesInLevel = ((int) (MAX_ENEMIES / (MAX_LEVEL - i)));
+            }else if(enemiesInLevel == 0 && enemiesToGenerate > 0){
+                enemiesInLevel = 1;
+            }
+
+            if(treasuresInLevel > ((int) (MAX_TREASURES / (MAX_LEVEL - i)))){
+                treasuresInLevel= ((int) (MAX_TREASURES / (MAX_LEVEL - i)));
+            }else if(treasuresInLevel == 0 && treasuresToGenerate > 0){
+                treasuresInLevel = 1;
+            }
+
+            levels[i] = new Level(i);
+            levels[i].setEnemies(new Enemy[enemiesInLevel]);
+            levels[i].setTreasures(new Treasure[treasuresInLevel]);
+
+            for (int j = 0; j < enemiesInLevel; j++) {
+                levels[i].addEnemy(Enemy.randEnemy());
+                enemiesToGenerate--;
+            }
+
+            for (int j = 0; j < treasuresInLevel; j++) {
+                levels[i].addTreasure(Treasure.randTreasure());
+                treasuresToGenerate--;
+            }
+
+            totalScoreUntil += levels[i].totalLevelScore();
+            levels[i].setNextLevelScore((int) (totalScoreUntil * 0.7));
+            levels[i].calculateDifficulty();
+        }
+
+        response.setResponse(false, getInfo(), null);
+
+        return response;
+    }
+
+    public String getInfo() {
+        String msg = "";
+        for (int i = 0; i < MAX_LEVEL; i++) {
+            if (levels[i] != null) {
+                msg += levels[i].getInfo();
+            }
+        }
+        return msg;
+    }
+
+    public int getCurrentLevel() {
+        return currentLevel;
+    }
+
+    public void setCurrentLevel(int currentLevel) {
+        this.currentLevel = currentLevel;
+    }
+
+    public Level[] getLevels() {
+        return levels;
+    }
+
+    public void setLevels(Level[] levels) {
+        this.levels = levels;
     }
 }
