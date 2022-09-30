@@ -19,11 +19,9 @@ public class Main {
         Main main = new Main();
 
         do {
-
             main.getMenu().showMenu();
             main.getMenu().readOption();
             main.getMenu().executeOption();
-
-        } while (main.menu.stillAlive());
+        } while (main.getMenu().stillAlive());
     }
 }

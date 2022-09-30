@@ -2,17 +2,6 @@ package model;
 
 public class Enemy {
 
-    public static final int OGRE = 0; // 10
-    public static final int ABSTRACT = 1; // 7
-    public static final int MAGICIAN = 2; // 5
-    public static final int BOSS = 3; // 3
-
-    public static final int STATE_ALIVE = 0;
-    public static final int STATE_DEAD = 1;
-
-    public static final String[] IMAGES = {};
-    public static final int[] INITIAL_SCORES = { 2, 5, 10, 20 };
-
     private int type;
     private int score;
     private int state;
@@ -22,8 +11,8 @@ public class Enemy {
 
     public Enemy(int type) {
         this.type = type;
-        this.score = INITIAL_SCORES[type];
-        this.state = STATE_ALIVE;
+        this.score = EnemyType.INITIAL_SCORES_FOR_ENEMIES[type];
+        this.state = EnemyType.STATE_ALIVE;
 
         posX = Coordinates.generateRandX();
         posY = Coordinates.generateRandY();
@@ -34,7 +23,7 @@ public class Enemy {
     }
 
     public int killAndDropScore() {
-        this.state = STATE_DEAD;
+        this.state = EnemyType.STATE_DEAD;
         return score;
     }
 
@@ -43,9 +32,15 @@ public class Enemy {
         posY = y;
     }
 
-    public String getInfo() {
-        return "Enemigo tipo: " + type + ", Puntos: " + score + ", Estado: " + state + ", Posición: " + "(x:" + posX
+    @Override
+    public String toString() {
+        return "Enemigo: " + EnemyType.ENEMY_NAMES[type] + ", Puntos: " + score + ", Estado: " + (state == 0 ? "Vivo" : "Muerto")
+                + ", Posición: " + "(x:" + posX
                 + ",y:" + posY + ")\n";
+    }
+
+    public String getName() {
+        return EnemyType.ENEMY_NAMES[type];
     }
 
     public int getType() {
@@ -61,7 +56,7 @@ public class Enemy {
     }
 
     public boolean isAlive() {
-        return state == STATE_ALIVE;
+        return state == EnemyType.STATE_ALIVE;
     }
 
     public int getPositionX() {
@@ -73,10 +68,10 @@ public class Enemy {
     }
 
     public static int pointsThatSteals(int enemyType) {
-        return (int) (INITIAL_SCORES[enemyType] / 3);
+        return (int) (EnemyType.INITIAL_SCORES_FOR_ENEMIES[enemyType] / 3);
     }
 
     public static Enemy randEnemy() {
-        return new Enemy((int) (Math.random() * 3));
+        return new Enemy((int) (Math.random() * 4));
     }
 }

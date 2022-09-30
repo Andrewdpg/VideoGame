@@ -4,7 +4,6 @@ public class Player {
 
     public static final int INITIAL_SCORE = 10;
     public static final int INITIAL_LIFES = 5;
-    
 
     private String nickname;
     private String name;
@@ -62,7 +61,8 @@ public class Player {
         return lifes > 0;
     }
 
-    public String getInfoToString() {
+    @Override
+    public String toString() {
         String msg = "\nJugador " + nickname + ":\n" +
                 "Puntaje: " + score + "\n" +
                 "Nivel: " + level + "\n" +

@@ -8,10 +8,6 @@ public class Reader {
 
     private static Scanner scn = new Scanner(System.in);
 
-    public Reader() {
-        
-    }
-
     public static String readLine() {
         String line = "";
 
@@ -40,7 +36,7 @@ public class Reader {
         return value;
     }
 
-    public static int readScore() {
+    public static int readNaturalNumber() {
         int score = -1;
 
         while (score < 0) {
@@ -51,11 +47,32 @@ public class Reader {
                 scn.nextLine();
             }
 
-            if(score < 0){
+            if (score < 0) {
                 System.out.println(Response.MUST_BE_POSITIVE);
             }
         }
 
         return score;
+    }
+
+    public static int readBetween(int min, int max) {
+        int option = min - 1;
+
+        if (min <= max) {
+            while (option < min || option > max) {
+                try {
+                    option = scn.nextInt();
+                } catch (Exception e) {
+                    System.out.println(Response.NOT_VALID_VALUE);
+                    scn.nextLine();
+                }
+
+                if (option < min || option > max) {
+                    System.out.println("Debe ser un valor entre " + min + " y " + max);
+                }
+            }
+        }
+
+        return option;
     }
 }

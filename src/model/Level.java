@@ -5,32 +5,57 @@ public class Level {
     public static final int DIFFICULTY_EASY = 0;
     public static final int DIFFICULTY_MEDIUM = 1;
     public static final int DIFFICULTY_HARD = 2;
+    public static final String[] DIFFICULTIES = { "EASY", "MEDIUM", "HARD" };
 
     private int number;
-    private int nextLevelScore;
     private Enemy[] enemies;
     private Treasure[] treasures;
     private int difficulty;
 
     public Level(int number) {
         this.number = number;
+        enemies = new Enemy[1];
+        treasures = new Treasure[1];
     }
 
     public void addEnemy(Enemy enemy) {
-        for (int i = 0; i < enemies.length; i++) {
+        boolean isFound = false;
+
+        for (int i = 0; i < enemies.length && !isFound; i++) {
             if (enemies[i] == null) {
                 enemies[i] = enemy;
-                i = enemies.length;
+                isFound = true;
             }
+        }
+
+        if(!isFound){
+            Enemy[] tempEnemies = new Enemy[enemies.length +1];
+            for (int i = 0; i < enemies.length; i++) {
+                tempEnemies[i] = enemies[i];
+            }
+            tempEnemies[tempEnemies.length-1] = enemy;
+            enemies = tempEnemies;
         }
     }
 
     public void addTreasure(Treasure treasure) {
-        for (int i = 0; i < treasures.length; i++) {
+
+        boolean isFound = false;
+
+        for (int i = 0; i < treasures.length && !isFound; i++) {
             if (treasures[i] == null) {
                 treasures[i] = treasure;
-                i = treasures.length;
+                isFound = true;
             }
+        }
+
+        if(!isFound){
+            Treasure[] tempTreasures = new Treasure[treasures.length +1];
+            for (int i = 0; i < treasures.length; i++) {
+                tempTreasures[i] = treasures[i];
+            }
+            tempTreasures[tempTreasures.length-1] = treasure;
+            treasures = tempTreasures;
         }
     }
 
@@ -47,6 +72,10 @@ public class Level {
         if (totalScoreTreasures < totalScoreEnemies) {
             difficulty = DIFFICULTY_HARD;
         }
+    }
+
+    public String difficultyAsString() {
+        return DIFFICULTIES[this.difficulty];
     }
 
     public int totalEnemiesScore() {
@@ -73,14 +102,15 @@ public class Level {
         return totalEnemiesScore() + totalTreasuresScore();
     }
 
-    public String getInfo() {
+    @Override
+    public String toString() {
         String msg = "\nNivel " + (number + 1) + "\n";
-        msg += "Puntaje necesario para el siguiente nivel:" + nextLevelScore + "\n\n";
+        msg += "Puntaje necesario para el siguiente nivel:" + Game.SCORES_FOR_LEVEL[number] + "\n\n";
         msg += "Enemigos: \n\n";
         if (enemies != null) {
             for (int i = 0; i < enemies.length; i++) {
                 if (enemies[i] != null) {
-                    msg += enemies[i].getInfo();
+                    msg += enemies[i].toString();
                 }
             }
         }
@@ -88,7 +118,7 @@ public class Level {
         if (treasures != null) {
             for (int i = 0; i < treasures.length; i++) {
                 if (treasures[i] != null) {
-                    msg += treasures[i].getInfo();
+                    msg += treasures[i].toString();
                 }
             }
         }
@@ -104,11 +134,7 @@ public class Level {
     }
 
     public int getNextLevelScore() {
-        return nextLevelScore;
-    }
-
-    public void setNextLevelScore(int nextLevelScore) {
-        this.nextLevelScore = nextLevelScore;
+        return Game.SCORES_FOR_LEVEL[number];
     }
 
     public Enemy[] getEnemies() {

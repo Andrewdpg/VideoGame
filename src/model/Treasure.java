@@ -1,19 +1,17 @@
 package model;
 
-
 public class Treasure {
 
-    private String name;
-    private String image;
-    private int score;
+    private int type;
+    private int state;
 
     private int posX;
     private int posY;
 
-    public Treasure() {
-        this.name = String.valueOf(Math.random() * 10000);
-        this.image = String.valueOf(Math.random() * 10000);
-        this.score = (int) (Math.random() * 100);
+    public Treasure(int type) {
+
+        this.type = type;
+        this.state = TreasureType.STATE_NOT_FOUND;
 
         posX = Coordinates.generateRandX();
         posY = Coordinates.generateRandY();
@@ -24,8 +22,11 @@ public class Treasure {
         posY = y;
     }
 
-    public String getInfo() {
-        return "Tesoro: " + name + ", Puntos: " + score + ", Posición: " + "(x:" + posX
+    @Override
+    public String toString() {
+        return "Tesoro: " + TreasureType.TREASURE_NAMES[type] + ", Puntos: " + TreasureType.SCORES_FOR_TREASURE[type] + ", Estado: "
+                + (state == 0 ? "No encontrado" : "Encontrado")
+                + ", Posición: " + "(x:" + posX
                 + ",y:" + posY + ")\n";
     }
 
@@ -38,30 +39,14 @@ public class Treasure {
     }
 
     public int getScore() {
-        return score;
-    }
-
-    public void setScore(int score) {
-        this.score = score;
+        return TreasureType.SCORES_FOR_TREASURE[type];
     }
 
     public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+        return TreasureType.TREASURE_IMAGES[type];
     }
 
     public static Treasure randTreasure() {
-        return new Treasure();
+        return new Treasure((int) (Math.random() * 4));
     }
 }

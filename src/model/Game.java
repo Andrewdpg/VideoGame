@@ -4,12 +4,7 @@ import ui.Reader;
 
 public class Game {
 
-    public static final String NAME = "YOQUESE";
-    public static final int MAX_PLAYERS = 20;
-    public static final int MAX_ENEMIES = 25;
-    public static final int MAX_TREASURES = 50;
-    public static final int MAX_LEVEL = 10;
-    public static int[] SCORES_FOR_LEVEL = new int[MAX_LEVEL];
+    public static int[] SCORES_FOR_LEVEL = new int[GameState.MAX_LEVEL];
 
     private Player[] players;
     private Level[] levels;
@@ -18,9 +13,89 @@ public class Game {
     private int currentLevel;
 
     public Game() {
-        players = new Player[MAX_PLAYERS];
-        levels = new Level[MAX_LEVEL];
+        players = new Player[GameState.MAX_PLAYERS];
+        levels = new Level[GameState.MAX_LEVEL];
         response = new Response();
+    }
+
+    public void asignScreenSize() {
+
+        int option = Reader.readBetween(1, 7);
+
+        switch (option) {
+            case 1:
+                GameState.width = 640;
+                GameState.height = 480;
+                break;
+            case 2:
+                GameState.width = 960;
+                GameState.height = 540;
+                break;
+            case 3:
+                GameState.width = 1280;
+                GameState.height = 720;
+                break;
+            case 4:
+                GameState.width = 1920;
+                GameState.height = 1080;
+                break;
+            case 5:
+                GameState.width = 2560;
+                GameState.height = 1440;
+                break;
+            case 6:
+                GameState.width = 3840;
+                GameState.height = 2160;
+                break;
+            case 7:
+                GameState.width = 7680;
+                GameState.height = 4320;
+                break;
+            default:
+                System.out.println("Opción no válida, resolución por defecto: HD");
+                GameState.width = 1280;
+                GameState.height = 720;
+                break;
+        }
+    }
+
+    public Response initGame() {
+
+        int enemiesToGenerate = GameState.MAX_ENEMIES / 2;
+        int treasuresToGenerate = GameState.MAX_TREASURES / 2;
+
+        for (int i = 0; i < GameState.MAX_LEVEL; i++) {
+            levels[i] = new Level(i);
+        }
+
+        while (enemiesToGenerate > 0) {
+            levels[(int) (Math.random() * GameState.MAX_LEVEL)].addEnemy(Enemy.randEnemy());
+            enemiesToGenerate--;
+        }
+
+        while (treasuresToGenerate > 0) {
+            levels[(int) (Math.random() * GameState.MAX_LEVEL)].addTreasure(Treasure.randTreasure());
+            treasuresToGenerate--;
+        }
+
+        reevaluateGame();
+        response.setResponse(false, toString(), null);
+
+        return response;
+    }
+
+    public void reevaluateGame() {
+
+        int totalGameScore = 0;
+
+        for (int i = 0; i < GameState.MAX_LEVEL; i++) {
+            levels[i].calculateDifficulty();
+
+            totalGameScore += levels[i].totalLevelScore();
+            SCORES_FOR_LEVEL[i] = (int) (totalGameScore * 0.7);
+
+        }
+
     }
 
     public Player newPlayer() {
@@ -61,9 +136,35 @@ public class Game {
         for (int pos = 0; pos < players.length && response.isError(); pos++) {
             if (players[pos] != null) {
                 if (players[pos].getNickname().equals(nickname)) {
-                    response.setResponse(false, players[pos].getInfoToString(), pos);
+                    response.setResponse(false, players[pos].toString(), pos);
                 }
             }
+        }
+
+        return response;
+    }
+
+    public Response registerEnemyAt(Enemy enemy, int atLevel) {
+
+        response.setResponse(true, "Enemigo no valido", null);
+
+        if (enemy != null) {
+            levels[atLevel].addEnemy(enemy);
+            reevaluateGame();
+            response.setResponse(false, levels[atLevel].toString(), null);
+        }        
+
+        return response;
+    }
+
+    public Response registerTreasureAt(Treasure treasure, int atLevel) {
+
+        response.setResponse(true, "Tesoro no valido", null);
+
+        if (treasure != null) {
+            levels[atLevel].addTreasure(treasure);
+            reevaluateGame();
+            response.setResponse(false, levels[atLevel].toString(), null);
         }
 
         return response;
@@ -78,10 +179,10 @@ public class Game {
             System.out.println(response.getMessage());
 
             System.out.println("Nuevo puntaje: ");
-            int newScore = Reader.readScore();
+            int newScore = Reader.readNaturalNumber();
 
             players[pos].changeScore(newScore);
-            response.setResponse(false, players[pos].getInfoToString(), null);
+            response.setResponse(false, players[pos].toString(), null);
         }
 
         return response;
@@ -93,64 +194,32 @@ public class Game {
         if (!response.isError()) {
             int pos = (int) response.getData();
             players[pos].addToScore(players[pos].neededScore());
-            response.setResponse(false, players[pos].getInfoToString(), null);
+            response.setResponse(false, players[pos].toString(), null);
         }
 
         return response;
     }
 
-    public Response generateNewRandomGame() {
+    public Response listPlayers() {
 
-        int enemiesToGenerate = MAX_ENEMIES;
-        int treasuresToGenerate = MAX_TREASURES;
-        int totalScoreUntil = 0;
-
-        for (int i = 0; i < MAX_LEVEL; i++) {
-
-            int enemiesInLevel = (int) (Math.random() * enemiesToGenerate);
-            int treasuresInLevel = (int) (Math.random() * treasuresToGenerate);
-
-            if(enemiesInLevel > ((int) (MAX_ENEMIES / (MAX_LEVEL - i)))){
-                enemiesInLevel = ((int) (MAX_ENEMIES / (MAX_LEVEL - i)));
-            }else if(enemiesInLevel == 0 && enemiesToGenerate > 0){
-                enemiesInLevel = 1;
-            }
-
-            if(treasuresInLevel > ((int) (MAX_TREASURES / (MAX_LEVEL - i)))){
-                treasuresInLevel= ((int) (MAX_TREASURES / (MAX_LEVEL - i)));
-            }else if(treasuresInLevel == 0 && treasuresToGenerate > 0){
-                treasuresInLevel = 1;
-            }
-
-            levels[i] = new Level(i);
-            levels[i].setEnemies(new Enemy[enemiesInLevel]);
-            levels[i].setTreasures(new Treasure[treasuresInLevel]);
-
-            for (int j = 0; j < enemiesInLevel; j++) {
-                levels[i].addEnemy(Enemy.randEnemy());
-                enemiesToGenerate--;
-            }
-
-            for (int j = 0; j < treasuresInLevel; j++) {
-                levels[i].addTreasure(Treasure.randTreasure());
-                treasuresToGenerate--;
-            }
-
-            totalScoreUntil += levels[i].totalLevelScore();
-            levels[i].setNextLevelScore((int) (totalScoreUntil * 0.7));
-            levels[i].calculateDifficulty();
-        }
-
-        response.setResponse(false, getInfo(), null);
-
-        return response;
-    }
-
-    public String getInfo() {
         String msg = "";
-        for (int i = 0; i < MAX_LEVEL; i++) {
+
+        for (int i = 0; i < players.length; i++) {
+            if (players[i] != null) {
+                msg += players[i].toString();
+            }
+        }
+
+        response.setResponse(false, msg, null);
+        return response;
+    }
+
+    @Override
+    public String toString() {
+        String msg = "";
+        for (int i = 0; i < GameState.MAX_LEVEL; i++) {
             if (levels[i] != null) {
-                msg += levels[i].getInfo();
+                msg += levels[i].toString();
             }
         }
         return msg;

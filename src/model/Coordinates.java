@@ -1,16 +1,12 @@
 package model;
 
-import java.awt.*;
-
 public class Coordinates {
 
-    public static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();;
-    
     public static int generateRandX(){
-        return (int) (Math.random() * screenSize.getWidth());
+        return (int) (Math.random() * GameState.width);
     }
 
     public static int generateRandY(){
-        return (int) (Math.random() * screenSize.getHeight());
+        return (int) (Math.random() * GameState.height);
     }
 }
