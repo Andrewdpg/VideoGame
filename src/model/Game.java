@@ -142,6 +142,32 @@ public class Game {
     }
 
     /**
+     * Calculates the total of enemies in game.
+     * 
+     * @return total of enemies.
+     */
+    public int totalEnemies() {
+        int count = 0;
+        for (int i = 0; i < levels.length; i++) {
+            count += levels[i].totalEnemies();
+        }
+        return count;
+    }
+
+    /**
+     * Calculates the total of treasures in game.
+     * 
+     * @return total of treasures.
+     */
+    public int totalTreasures() {
+        int count = 0;
+        for (int i = 0; i < levels.length; i++) {
+            count += levels[i].totalTreasures();
+        }
+        return count;
+    }
+
+    /**
      * Registers an enemy at a selected level
      * 
      * @param enemy   the enemy to register.
@@ -151,12 +177,16 @@ public class Game {
      */
     public Response registerEnemyAt(Enemy enemy, int atLevel) {
 
-        response.setResponse(true, Response.NOT_VALID_ENTITY, null);
+        response.setResponse(true, Response.MAX_CAPACITY, null);
 
-        if (enemy != null) {
-            levels[atLevel].addEnemy(enemy);
-            reevaluateGame();
-            response.setResponse(false, levels[atLevel].toString(), null);
+        if (totalEnemies() < GameState.MAX_ENEMIES) {
+            response.setResponse(true, Response.NOT_VALID_ENTITY, null);
+
+            if (enemy != null) {
+                levels[atLevel].addEnemy(enemy);
+                reevaluateGame();
+                response.setResponse(false, levels[atLevel].toString(), null);
+            }
         }
 
         return response;
@@ -172,12 +202,16 @@ public class Game {
      */
     public Response registerTreasureAt(Treasure treasure, int atLevel) {
 
-        response.setResponse(true, Response.NOT_VALID_ENTITY, null);
+        response.setResponse(true, Response.MAX_CAPACITY, null);
 
-        if (treasure != null) {
-            levels[atLevel].addTreasure(treasure);
-            reevaluateGame();
-            response.setResponse(false, levels[atLevel].toString(), null);
+        if (totalTreasures() < GameState.MAX_TREASURES) {
+            response.setResponse(true, Response.NOT_VALID_ENTITY, null);
+
+            if (treasure != null) {
+                levels[atLevel].addTreasure(treasure);
+                reevaluateGame();
+                response.setResponse(false, levels[atLevel].toString(), null);
+            }
         }
 
         return response;
@@ -237,16 +271,17 @@ public class Game {
 
         int count = 0;
         String msg = "";
+        Response tempResponse = new Response();
 
         for (int i = 0; i < levels.length; i++) {
-            response = levels[i].countOfTreasures(type);
-            count += (int) response.getData();
-            msg += response.getMessage();
+            tempResponse = levels[i].countOfTreasures(type);
+            count += (int) tempResponse.getData();
+            msg += tempResponse.getMessage();
         }
 
-        response.setResponse(false, msg, count);
+        tempResponse.setResponse(false, msg, count);
 
-        return response;
+        return tempResponse;
     }
 
     /**
@@ -260,16 +295,17 @@ public class Game {
 
         int count = 0;
         String msg = "";
+        Response tempResponse = new Response();
 
         for (int i = 0; i < levels.length; i++) {
-            response = levels[i].countOfEnemies(type);
-            count += (int) response.getData();
-            msg += response.getMessage();
+            tempResponse = levels[i].countOfEnemies(type);
+            count += (int) tempResponse.getData();
+            msg += tempResponse.getMessage();
         }
 
-        response.setResponse(false, msg, count);
+        tempResponse.setResponse(false, msg, count);
 
-        return response;
+        return tempResponse;
     }
 
     /**
@@ -285,6 +321,7 @@ public class Game {
         String msg = "";
 
         for (int i = 0; i < TreasureType.TREASURE_NAMES.length; i++) {
+
             if (((int) getTreasuresOfType(i).getData()) > higher) {
                 response = getTreasuresOfType(i);
                 higher = (int) response.getData();

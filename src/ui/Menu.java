@@ -91,7 +91,7 @@ public class Menu {
             case 2:
                 System.out.print("Dame el nombre de el nuevo enemigo:");
                 String enemyName = Reader.readLine("_");
-                System.out.println("¿En qué nivel quieres registrarlo? 0 - " + GameState.MAX_LEVEL);
+                System.out.println("¿En qué nivel quieres registrarlo? 1 - " + GameState.MAX_LEVEL);
                 selectedLevel = Reader.readBetween(1, GameState.MAX_LEVEL);
                 System.out.println("Dame el tipo de enemigo a registrar: \n\n" + EnemyType.LIST_OF_ENEMIES);
                 selectedEntity = Reader.readBetween(0, EnemyType.INITIAL_SCORES_FOR_ENEMIES.length - 1);

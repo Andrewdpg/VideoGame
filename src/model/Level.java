@@ -19,6 +19,36 @@ public class Level {
     }
 
     /**
+     * Calculates the total of enemies in level.
+     * 
+     * @return total of enemies.
+     */
+    public int totalEnemies() {
+        int count = 0;
+        for (int i = 0; i < enemies.length; i++) {
+            if(enemies[i] != null){
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Calculates the total of treasures in level.
+     * 
+     * @return total of treasures.
+     */
+    public int totalTreasures() {
+        int count = 0;
+        for (int i = 0; i < treasures.length; i++) {
+            if(treasures[i] != null){
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
      * Adds an enemy to the current level. In case the array is full it will replace
      * the current array of enemies with another array of a bigger size.
      * 
@@ -221,7 +251,7 @@ public class Level {
 
     @Override
     public String toString() {
-        String msg = "\nNivel " + (number + 1) +" - Dificultad: " + difficultyAsString() +  "\n";
+        String msg = "\nNivel " + (number + 1) + " - Dificultad: " + difficultyAsString() + "\n";
         msg += "Puntaje necesario para el siguiente nivel:" + Game.SCORES_FOR_LEVEL[number] + "\n\n";
         msg += "Enemigos: \n\n";
         if (enemies != null) {
