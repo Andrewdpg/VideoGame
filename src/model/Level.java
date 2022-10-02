@@ -79,7 +79,7 @@ public class Level {
      * replace
      * the current array of trasures with another array of a bigger size.
      * 
-     * @param enemy enemy to add.
+     * @param treasure treasure to add.
      */
     public void addTreasure(Treasure treasure) {
         boolean isFound = false;

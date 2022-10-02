@@ -31,6 +31,7 @@ public class Reader {
     /**
      * Reads a valid (not empty) String line via console. Excludes a given String
      * 
+     * @param excludes value to be excluded from input.
      * @return read String
      */
     public static String readLine(String excludes) {
