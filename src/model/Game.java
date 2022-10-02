@@ -18,47 +18,12 @@ public class Game {
         response = new Response();
     }
 
-    public void asignScreenSize() {
-
-        int option = Reader.readBetween(1, 7);
-
-        switch (option) {
-            case 1:
-                GameState.width = 640;
-                GameState.height = 480;
-                break;
-            case 2:
-                GameState.width = 960;
-                GameState.height = 540;
-                break;
-            case 3:
-                GameState.width = 1280;
-                GameState.height = 720;
-                break;
-            case 4:
-                GameState.width = 1920;
-                GameState.height = 1080;
-                break;
-            case 5:
-                GameState.width = 2560;
-                GameState.height = 1440;
-                break;
-            case 6:
-                GameState.width = 3840;
-                GameState.height = 2160;
-                break;
-            case 7:
-                GameState.width = 7680;
-                GameState.height = 4320;
-                break;
-            default:
-                System.out.println("Opción no válida, resolución por defecto: HD");
-                GameState.width = 1280;
-                GameState.height = 720;
-                break;
-        }
-    }
-
+    /**
+     * Initializes the game with random enemies (the half of maximun) and treasures
+     * (the half of maximun). After initializes, it "reevaluates the game".
+     * 
+     * @return A response with the data of the game.
+     */
     public Response initGame() {
 
         int enemiesToGenerate = GameState.MAX_ENEMIES / 2;
@@ -84,6 +49,10 @@ public class Game {
         return response;
     }
 
+    /**
+     * Reevaluates the difficulties of the different levels in game and recalculates
+     * the minimun scores for each level up of players.
+     */
     public void reevaluateGame() {
 
         int totalGameScore = 0;
@@ -96,8 +65,21 @@ public class Game {
 
         }
 
+        for (int i = 0; i < players.length; i++) {
+            if (players[i] != null) {
+                players[i].evaluateLevel();
+            }
+        }
+
     }
 
+    /**
+     * Generates a new player object with default values, asking to user for its
+     * name
+     * and nickname.
+     * 
+     * @return generated player object.
+     */
     public Player newPlayer() {
 
         System.out.print("Nombre: ");
@@ -108,9 +90,15 @@ public class Game {
         return new Player(nickname, name);
     }
 
-    public Response createPlayer() {
+    /**
+     * Register a new player in case there is space for it.
+     * 
+     * @return A response with the resulting operation.
+     */
+    public Response registerPlayer() {
 
         Player newPlayer = newPlayer();
+        newPlayer.evaluateLevel();
         response.setResponse(false, Response.MAX_CAPACITY, null);
 
         for (int i = 0; i < players.length && !response.isError(); i++) {
@@ -129,6 +117,15 @@ public class Game {
 
     }
 
+    /**
+     * Searches for a player by its nickname.
+     * 
+     * @param nickname the player to look for.
+     * @return A response with the resulting operation. In case of the player is
+     *         found, a message
+     *         with the player's information and, on the other hand, it's position
+     *         in the array as data.
+     */
     public Response searchPlayerByNickname(String nickname) {
 
         response.setResponse(true, Response.PLAYER_NOT_FOUND, null);
@@ -144,22 +141,38 @@ public class Game {
         return response;
     }
 
+    /**
+     * Registers an enemy at a selected level
+     * 
+     * @param enemy   the enemy to register.
+     * @param atLevel the selected level for the enemy.
+     * @return A response with the resultin operation. In case of success, with a
+     *         message containing the information of the level.
+     */
     public Response registerEnemyAt(Enemy enemy, int atLevel) {
 
-        response.setResponse(true, "Enemigo no valido", null);
+        response.setResponse(true, Response.NOT_VALID_ENTITY, null);
 
         if (enemy != null) {
             levels[atLevel].addEnemy(enemy);
             reevaluateGame();
             response.setResponse(false, levels[atLevel].toString(), null);
-        }        
+        }
 
         return response;
     }
 
+    /**
+     * Registers an treasure at a selected level
+     * 
+     * @param treasure the treasure to register.
+     * @param atLevel  the selected level for the treasure.
+     * @return A response with the resultin operation. In case of success, with a
+     *         message containing the information of the level.
+     */
     public Response registerTreasureAt(Treasure treasure, int atLevel) {
 
-        response.setResponse(true, "Tesoro no valido", null);
+        response.setResponse(true, Response.NOT_VALID_ENTITY, null);
 
         if (treasure != null) {
             levels[atLevel].addTreasure(treasure);
@@ -170,6 +183,13 @@ public class Game {
         return response;
     }
 
+    /**
+     * Modifies the score of a player by reading a new score via console.
+     * 
+     * @param nickname nickname of the player to modify.
+     * @return A response with the resulting operation. In case of success, a
+     *         message with player's information.
+     */
     public Response modifyScore(String nickname) {
 
         response = searchPlayerByNickname(nickname);
@@ -179,7 +199,7 @@ public class Game {
             System.out.println(response.getMessage());
 
             System.out.println("Nuevo puntaje: ");
-            int newScore = Reader.readNaturalNumber();
+            int newScore = Reader.readBetween(0, Integer.MAX_VALUE);
 
             players[pos].changeScore(newScore);
             response.setResponse(false, players[pos].toString(), null);
@@ -188,28 +208,188 @@ public class Game {
         return response;
     }
 
-    public Response levelUp(String nickname) {
+    /**
+     * Requests for the needed score of a player in order to level up.
+     * 
+     * @param nickname nickname of the player to look for.
+     * @return A response with the resulting operation.
+     */
+    public Response getNeededScore(String nickname) {
         response = searchPlayerByNickname(nickname);
 
         if (!response.isError()) {
             int pos = (int) response.getData();
-            players[pos].addToScore(players[pos].neededScore());
-            response.setResponse(false, players[pos].toString(), null);
+            response.setResponse(false,
+                    "El jugador necesita: " + players[pos].neededScore() + " puntos para subir de nivel.", null);
         }
 
         return response;
     }
 
-    public Response listPlayers() {
+    /**
+     * Looks for all the treasures of an specified type in game.
+     * 
+     * @param type type of treasure to look for.
+     * @return A response with the resulting operation. A message with all of the
+     *         treasures information. Also, the amount of treasures found, as data.
+     */
+    public Response getTreasuresOfType(int type) {
 
+        int count = 0;
         String msg = "";
 
+        for (int i = 0; i < levels.length; i++) {
+            response = levels[i].countOfTreasures(type);
+            count += (int) response.getData();
+            msg += response.getMessage();
+        }
+
+        response.setResponse(false, msg, count);
+
+        return response;
+    }
+
+    /**
+     * Looks for all the enemies of an specified type in game.
+     * 
+     * @param type type of enemy to look for.
+     * @return A response with the resulting operation. A message with all of the
+     *         enemies information. Also, the amount of enemies found, as data.
+     */
+    public Response getEnemiesOfType(int type) {
+
+        int count = 0;
+        String msg = "";
+
+        for (int i = 0; i < levels.length; i++) {
+            response = levels[i].countOfEnemies(type);
+            count += (int) response.getData();
+            msg += response.getMessage();
+        }
+
+        response.setResponse(false, msg, count);
+
+        return response;
+    }
+
+    /**
+     * Looks for the most repeated treasure in game.
+     * 
+     * @return A response with the result of the operation. A message with the
+     *         information of all found treasures. Also, the amount of these
+     *         treasures found, as data.
+     */
+    public Response searchMostRepeatedTreasure() {
+
+        int higher = 0;
+        String msg = "";
+
+        for (int i = 0; i < TreasureType.TREASURE_NAMES.length; i++) {
+            if (((int) getTreasuresOfType(i).getData()) > higher) {
+                response = getTreasuresOfType(i);
+                higher = (int) response.getData();
+                msg = response.getMessage() + "\nTotal de tesoros " + TreasureType.TREASURE_NAMES[i] + " encontrados: "
+                        + higher;
+                response.setResponse(false, msg, higher);
+            }
+        }
+
+        return response;
+    }
+
+    /**
+     * Looks for the first enemy in game with the highest score.
+     * 
+     * @return A response with the result of the operation. A message with the
+     *         information of the enemy. Also, its score as data.
+     */
+    public Response searchHigherScoreEnemy() {
+        int higher = 0;
+        response.setResponse(true, Response.ENTITY_NOT_FOUND, null);
+        for (int i = 0; i < levels.length; i++) {
+            if (((int) levels[i].higherScoreEnemy().getData()) > higher) {
+                response = levels[i].higherScoreEnemy();
+                higher = (int) response.getData();
+            }
+        }
+        return response;
+    }
+
+    /**
+     * List a part of the top players in game.
+     * 
+     * @param quantity The amount of players to show.
+     * @return String with all of these player's information
+     */
+    public Response topPlayers(int quantity) {
+        Player[] topPlayers = new Player[quantity];
+        String msg = "";
+        boolean isAdded = false;
+        int lowest;
+        int lowestPos;
+        for (int i = 0; i < players.length; i++) {
+            if (players[i] != null) {
+                isAdded = false;
+                lowest = Integer.MAX_VALUE;
+                lowestPos = -1;
+                for (int j = 0; j < quantity && !isAdded; j++) {
+                    if (topPlayers[j] == null) {
+                        topPlayers[j] = players[i];
+                        isAdded = true;
+                    } else {
+                        if (topPlayers[j].getScore() < lowest) {
+                            lowest = topPlayers[j].getScore();
+                            lowestPos = j;
+                        }
+                    }
+                }
+                if (!isAdded && players[i].getScore() > lowest) {
+                    topPlayers[lowestPos] = players[i];
+                }
+            }
+        }
+        for (int i = 0; i < quantity; i++) {
+            if (topPlayers[i] != null) {
+                msg += topPlayers[i].toString();
+            }
+        }
+
+        response.setResponse(false, msg, null);
+
+        return response;
+    }
+
+    /**
+     * Looks for consonants in the names ofall ofthe game enemies.
+     * 
+     * @return A response with the result of the operation. A message about the
+     *         consontants found. Also, its total as data.
+     */
+    public Response countEnemyConsonants() {
+        int count = 0;
+        String msg = "";
+        for (int i = 0; i < levels.length; i++) {
+            response = levels[i].consonantsInEnemies();
+            count += (int) response.getData();
+            msg += response.getMessage();
+        }
+        msg += "\n Total de consonantes encontradas en el juego: " + count;
+        response.setResponse(false, msg, count);
+        return response;
+    }
+
+    /**
+     * List all the players in game.
+     * 
+     * @return String with all of player's information
+     */
+    public Response listPlayers() {
+        String msg = "";
         for (int i = 0; i < players.length; i++) {
             if (players[i] != null) {
                 msg += players[i].toString();
             }
         }
-
         response.setResponse(false, msg, null);
         return response;
     }
@@ -223,6 +403,16 @@ public class Game {
             }
         }
         return msg;
+    }
+
+    /**
+     * Retreaves a level's information.
+     * 
+     * @param selectedLevel level to look for.
+     * @return String with level's data.
+     */
+    public String toString(int selectedLevel) {
+        return levels[selectedLevel].toString();
     }
 
     public int getCurrentLevel() {

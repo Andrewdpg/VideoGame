@@ -10,6 +10,8 @@ public class Player {
     private int score;
     private int lifes;
     private int level;
+    private int currentLevel;
+    private Coordinates location;
 
     public Player(String nickname, String name) {
         this.nickname = nickname;
@@ -17,46 +19,87 @@ public class Player {
         this.score = INITIAL_SCORE;
         this.lifes = INITIAL_LIFES;
         this.level = 0;
+        this.currentLevel = 0;
+        this.location = new Coordinates(10,10);
     }
 
+    /**
+     * Adds to score an specified amount of points.
+     * 
+     * @param points points to add.
+     */
     public void addToScore(int points) {
         score += points;
         evaluateLevel();
     }
 
+    /**
+     * Changes the score for another given and evaluates is level again.
+     * 
+     * @param score score to set
+     */
     public void changeScore(int score) {
         this.score = score;
         evaluateLevel();
     }
 
-    public int neededScore(){
+    /**
+     * Calculates the score needed to level up.
+     * 
+     * @return needed score.
+     */
+    public int neededScore() {
         return Game.SCORES_FOR_LEVEL[level] - score;
     }
 
+    /**
+     * Substract a life and an amont of score based on theenemy who killed it.
+     * 
+     * @param enemyType enemy who killed the player.
+     */
     public void gotKilledBy(int enemyType) {
         lifes--;
         removeFromScore(Enemy.pointsThatSteals(enemyType));
     }
 
+    /**
+     * Removes an specified amount of points from score.
+     * 
+     * @param points points to substract.
+     */
     public void removeFromScore(int points) {
         score = score - points;
         evaluateLevel();
     }
 
-    private void evaluateLevel() {
+    /**
+     * Evaluates the level of the player based on the minimun requeriments of each
+     * level.
+     */
+    public void evaluateLevel() {
 
         boolean isDone = false;
         level = 0;
 
         for (int i = 0; i < Game.SCORES_FOR_LEVEL.length && !isDone; i++) {
-            if(score >= Game.SCORES_FOR_LEVEL[i]){
+            if (score >= Game.SCORES_FOR_LEVEL[i]) {
                 level++;
-            }else{
+            } else {
                 isDone = true;
             }
         }
+
+        if (level > currentLevel) {
+            currentLevel = level;
+            location.setLocationTo(Coordinates.generateRandX(), Coordinates.generateRandY());
+        }
     }
 
+    /**
+     * Validates if the player is still alive.
+     * 
+     * @return True in case it is alive. False otherwise.
+     */
     public boolean stillAlive() {
         return lifes > 0;
     }
@@ -66,7 +109,8 @@ public class Player {
         String msg = "\nJugador " + nickname + ":\n" +
                 "Puntaje: " + score + "\n" +
                 "Nivel: " + level + "\n" +
-                "Siguiente nivel en: " + (level == Game.SCORES_FOR_LEVEL.length? 0:Game.SCORES_FOR_LEVEL[level] - score) + " puntos\n" +
+                "Siguiente nivel en: "
+                + (level == Game.SCORES_FOR_LEVEL.length ? 0 : Game.SCORES_FOR_LEVEL[level] - score) + " puntos\n" +
                 "Vidas restantes: " + lifes + "\n";
         return msg;
     }
@@ -102,4 +146,21 @@ public class Player {
     public int getLevel() {
         return level;
     }
+
+    public int getCurrentLevel() {
+        return currentLevel;
+    }
+
+    public void setCurrentLevel(int currentLevel) {
+        this.currentLevel = currentLevel;
+    }
+
+    public Coordinates getLocation() {
+        return location;
+    }
+
+    public void setLocation(int x, int y) {
+        this.location.setLocationTo(x, y);
+    }
+
 }

@@ -8,6 +8,11 @@ public class Reader {
 
     private static Scanner scn = new Scanner(System.in);
 
+    /**
+     * Reads a valid (not empty) String line via console.
+     * 
+     * @return read String
+     */
     public static String readLine() {
         String line = "";
 
@@ -23,6 +28,36 @@ public class Reader {
         return line;
     }
 
+    /**
+     * Reads a valid (not empty) String line via console. Excludes a given String
+     * 
+     * @return read String
+     */
+    public static String readLine(String excludes) {
+        String line = "";
+
+        while (line.equals("") || line.contains(excludes)) {
+            try {
+                line = scn.next();
+            } catch (Exception e) {
+                System.out.println(Response.NOT_VALID_VALUE);
+                scn.nextLine();
+            }
+
+            if (line.contains(excludes)) {
+                System.out.println("No debe contener: " + excludes);
+            }
+        }
+
+        return line;
+    }
+
+    /**
+     * Reads an int value via console.
+     * 
+     * @param def default value in case there is an error at reading.
+     * @return read value, or default value in case of error.
+     */
     public static int readInt(int def) {
         int value = def;
 
@@ -36,43 +71,32 @@ public class Reader {
         return value;
     }
 
-    public static int readNaturalNumber() {
-        int score = -1;
-
-        while (score < 0) {
-            try {
-                score = scn.nextInt();
-            } catch (Exception e) {
-                System.out.println(Response.NOT_VALID_VALUE);
-                scn.nextLine();
-            }
-
-            if (score < 0) {
-                System.out.println(Response.MUST_BE_POSITIVE);
-            }
-        }
-
-        return score;
-    }
-
+    /**
+     * Read an int value between to given numbers
+     * 
+     * @param min min value to read
+     * @param max max value to read
+     * @return read value
+     */
     public static int readBetween(int min, int max) {
-        int option = min - 1;
+        int value = min - 1;
 
         if (min <= max) {
-            while (option < min || option > max) {
+            while (value < min || value > max) {
                 try {
-                    option = scn.nextInt();
+                    value = scn.nextInt();
                 } catch (Exception e) {
                     System.out.println(Response.NOT_VALID_VALUE);
                     scn.nextLine();
                 }
 
-                if (option < min || option > max) {
+                if (value < min || value > max) {
                     System.out.println("Debe ser un valor entre " + min + " y " + max);
                 }
             }
         }
 
-        return option;
+        return value;
     }
+
 }
