@@ -10,7 +10,6 @@ public class Game {
     private Level[] levels;
 
     private Response response;
-    private int currentLevel;
 
     public Game() {
         players = new Player[GameState.MAX_PLAYERS];
@@ -26,8 +25,8 @@ public class Game {
      */
     public Response initGame() {
 
-        int enemiesToGenerate = GameState.MAX_ENEMIES / 2;
-        int treasuresToGenerate = GameState.MAX_TREASURES / 2;
+        int enemiesToGenerate = GameState.MAX_ENEMIES;
+        int treasuresToGenerate = GameState.MAX_TREASURES;
 
         for (int i = 0; i < GameState.MAX_LEVEL; i++) {
             levels[i] = new Level(i);
@@ -170,23 +169,20 @@ public class Game {
     /**
      * Registers an enemy at a selected level
      * 
-     * @param enemy   the enemy to register.
+     * @param selectedEntity   Type of enemy to register.
+     * @param enemyName   Name of the enemy to register.
      * @param atLevel the selected level for the enemy.
      * @return A response with the resultin operation. In case of success, with a
      *         message containing the information of the level.
      */
-    public Response registerEnemyAt(Enemy enemy, int atLevel) {
+    public Response registerEnemyAt(int selectedEntity, String enemyName, int atLevel) {
+        Enemy enemy = new Enemy(selectedEntity,enemyName);
+        response.setResponse(true, Response.NOT_VALID_ENTITY, null);
 
-        response.setResponse(true, Response.MAX_CAPACITY, null);
-
-        if (totalEnemies() < GameState.MAX_ENEMIES) {
-            response.setResponse(true, Response.NOT_VALID_ENTITY, null);
-
-            if (enemy != null) {
-                levels[atLevel].addEnemy(enemy);
-                reevaluateGame();
-                response.setResponse(false, levels[atLevel].toString(), null);
-            }
+        if (enemy != null) {
+            levels[atLevel].addEnemy(enemy);
+            reevaluateGame();
+            response.setResponse(false, levels[atLevel].toString(), null);
         }
 
         return response;
@@ -195,23 +191,19 @@ public class Game {
     /**
      * Registers an treasure at a selected level
      * 
-     * @param treasure the treasure to register.
+     * @param selectedEntity   Type of treasure to register.
      * @param atLevel  the selected level for the treasure.
      * @return A response with the resultin operation. In case of success, with a
      *         message containing the information of the level.
      */
-    public Response registerTreasureAt(Treasure treasure, int atLevel) {
+    public Response registerTreasureAt(int selectedEntity, int atLevel) {
+        Treasure treasure  = new Treasure(selectedEntity);
+        response.setResponse(true, Response.NOT_VALID_ENTITY, null);
 
-        response.setResponse(true, Response.MAX_CAPACITY, null);
-
-        if (totalTreasures() < GameState.MAX_TREASURES) {
-            response.setResponse(true, Response.NOT_VALID_ENTITY, null);
-
-            if (treasure != null) {
-                levels[atLevel].addTreasure(treasure);
-                reevaluateGame();
-                response.setResponse(false, levels[atLevel].toString(), null);
-            }
+        if (treasure != null) {
+            levels[atLevel].addTreasure(treasure);
+            reevaluateGame();
+            response.setResponse(false, levels[atLevel].toString(), null);
         }
 
         return response;
@@ -439,6 +431,8 @@ public class Game {
                 msg += levels[i].toString();
             }
         }
+        msg+= "Total de enemigos: " + totalEnemies()+"\n"+
+        "Total de tesoros: " + totalTreasures() + "\n";
         return msg;
     }
 
@@ -450,14 +444,6 @@ public class Game {
      */
     public String toString(int selectedLevel) {
         return levels[selectedLevel].toString();
-    }
-
-    public int getCurrentLevel() {
-        return currentLevel;
-    }
-
-    public void setCurrentLevel(int currentLevel) {
-        this.currentLevel = currentLevel;
     }
 
     public Level[] getLevels() {

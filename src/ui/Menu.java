@@ -1,11 +1,9 @@
 package ui;
 
-import model.Enemy;
 import model.EnemyType;
 import model.Game;
 import model.GameState;
 import model.Response;
-import model.Treasure;
 import model.TreasureType;
 
 public class Menu {
@@ -96,7 +94,7 @@ public class Menu {
                 System.out.println("Dame el tipo de enemigo a registrar: \n\n" + EnemyType.LIST_OF_ENEMIES);
                 selectedEntity = Reader.readBetween(0, EnemyType.INITIAL_SCORES_FOR_ENEMIES.length - 1);
 
-                message = game.registerEnemyAt(new Enemy(selectedEntity, enemyName), selectedLevel - 1).getMessage();
+                message = game.registerEnemyAt(selectedEntity, enemyName, selectedLevel - 1).getMessage();
                 break;
             case 3:
                 System.out.println("Dame el tipo de Tesoro a registrar: \n\n" + TreasureType.LIST_OF_TREASURES);
@@ -104,7 +102,7 @@ public class Menu {
                 System.out.println("¿En qué nivel quieres registrarlo? 0 - " + GameState.MAX_LEVEL);
                 selectedLevel = Reader.readBetween(0, GameState.MAX_LEVEL);
 
-                message = game.registerTreasureAt(new Treasure(selectedEntity), selectedLevel - 1).getMessage();
+                message = game.registerTreasureAt(selectedEntity, selectedLevel - 1).getMessage();
                 break;
             case 4:
                 System.out.print("Apodo del jugador a modificar: ");
